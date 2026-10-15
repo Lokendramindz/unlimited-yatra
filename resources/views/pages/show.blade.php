@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('title', $page->title.' - '.($site['site_name'] ?? 'Unlimited Yatra'))
+@section('description', \Illuminate\Support\Str::limit(strip_tags($page->subtitle ?: $page->content), 160, ''))
+@section('image', $page->image ? $page->image_url : '')
 @section('content')
 @include('partials.page-hero', ['heroTitle' => $page->title, 'heroSub' => $page->subtitle, 'heroImage' => $page->image ? $page->image_url : null, 'crumbs' => [$page->title => null]])
 
@@ -21,6 +23,6 @@
 <section class="bg-maroon-800 text-white py-12 text-center">
     <h2 class="font-display text-3xl">Ready for your yatra?</h2>
     <p class="text-orange-200 mt-2">{{ $site['tagline'] ?? '' }}</p>
-    <a href="{{ route('contact') }}" class="inline-block mt-6 bg-saffron-600 hover:bg-saffron-700 px-8 py-3 rounded-full font-semibold">Plan my yatra</a>
+    <a href="{{ route('contact') }}" class="site-btn site-btn-primary mt-6">Plan my yatra</a>
 </section>
 @endsection

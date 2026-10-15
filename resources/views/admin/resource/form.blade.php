@@ -22,6 +22,70 @@
                     @case('textarea')
                         <textarea name="{{ $name }}" rows="{{ $f['rows'] ?? 4 }}" class="w-full border rounded-lg px-3 py-2">{{ $value }}</textarea>
                         @break
+                    @case('itinerary')
+                        @php
+                            $days = old('itinerary_days', $editing ? $item->itinerary_days : []);
+                            $days = is_array($days) && count($days) ? $days : [['title' => 'Day 1', 'content' => '']];
+                        @endphp
+                        <div data-itinerary-editor data-next-index="{{ count($days) }}" class="space-y-4">
+                            <div data-itinerary-days class="space-y-4">
+                                @foreach ($days as $index => $day)
+                                    <div data-itinerary-day class="border border-gray-200 rounded-lg p-4 space-y-3">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-sm font-semibold text-gray-700">Itinerary day</span>
+                                            <button type="button" data-remove-day class="text-sm text-red-600 hover:underline">Remove day</button>
+                                        </div>
+                                        <input name="itinerary_days[{{ $index }}][title]" value="{{ old('itinerary_days.'.$index.'.title', $day['title'] ?? '') }}" placeholder="Day 1 - Arrival in Varanasi" class="w-full border rounded-lg px-3 py-2">
+                                        <textarea name="itinerary_days[{{ $index }}][content]" rows="4" placeholder="Describe the day's visits, travel, meals, and activities" class="w-full border rounded-lg px-3 py-2">{{ old('itinerary_days.'.$index.'.content', $day['content'] ?? '') }}</textarea>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" data-add-day class="border border-orange-600 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50">Add itinerary day</button>
+                            <p class="text-xs text-gray-500">Add a title and detailed description for each day. These appear in the itinerary tab on the Yatra page.</p>
+                            <template data-itinerary-template>
+                                <div data-itinerary-day class="border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span class="text-sm font-semibold text-gray-700">Itinerary day</span>
+                                        <button type="button" data-remove-day class="text-sm text-red-600 hover:underline">Remove day</button>
+                                    </div>
+                                    <input name="itinerary_days[__INDEX__][title]" value="Day __DAY__" placeholder="Day __DAY__ - Arrival in Varanasi" class="w-full border rounded-lg px-3 py-2">
+                                    <textarea name="itinerary_days[__INDEX__][content]" rows="4" placeholder="Describe the day's visits, travel, meals, and activities" class="w-full border rounded-lg px-3 py-2"></textarea>
+                                </div>
+                            </template>
+                        </div>
+                        @break
+                    @case('faq_list')
+                        @php
+                            $faqs = old('faqs', $editing ? $item->faq_list : []);
+                            $faqs = is_array($faqs) && count($faqs) ? $faqs : [['question' => '', 'answer' => '']];
+                        @endphp
+                        <div data-faq-editor data-next-index="{{ count($faqs) }}" class="space-y-4">
+                            <div data-faq-items class="space-y-4">
+                                @foreach ($faqs as $index => $faq)
+                                    <div data-faq-item class="space-y-3 rounded-lg border border-gray-200 p-4">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-sm font-semibold text-gray-700">Vehicle question</span>
+                                            <button type="button" data-remove-faq class="text-sm text-red-600 hover:underline">Remove question</button>
+                                        </div>
+                                        <input name="faqs[{{ $index }}][question]" value="{{ old('faqs.'.$index.'.question', $faq['question'] ?? '') }}" placeholder="Is a driver included?" class="w-full border rounded-lg px-3 py-2">
+                                        <textarea name="faqs[{{ $index }}][answer]" rows="3" placeholder="Add a clear answer for customers." class="w-full border rounded-lg px-3 py-2">{{ old('faqs.'.$index.'.answer', $faq['answer'] ?? '') }}</textarea>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" data-add-faq class="border border-orange-600 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50">Add FAQ</button>
+                            <p class="text-xs text-gray-500">FAQs appear on this vehicle's public details page.</p>
+                            <template data-faq-template>
+                                <div data-faq-item class="space-y-3 rounded-lg border border-gray-200 p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span class="text-sm font-semibold text-gray-700">Vehicle question</span>
+                                        <button type="button" data-remove-faq class="text-sm text-red-600 hover:underline">Remove question</button>
+                                    </div>
+                                    <input name="faqs[__INDEX__][question]" placeholder="Is a driver included?" class="w-full border rounded-lg px-3 py-2">
+                                    <textarea name="faqs[__INDEX__][answer]" rows="3" placeholder="Add a clear answer for customers." class="w-full border rounded-lg px-3 py-2"></textarea>
+                                </div>
+                            </template>
+                        </div>
+                        @break
                     @case('select')
                         <select name="{{ $name }}" class="w-full border rounded-lg px-3 py-2">
                             @if (($f['nullable'] ?? false) || isset($f['relation']))<option value="">-- none --</option>@endif
@@ -65,4 +129,38 @@
         <a href="{{ route('admin.resource.index', $resource) }}" class="px-6 py-2 rounded-lg border">Cancel</a>
     </div>
 </form>
+<script>
+    document.querySelectorAll('[data-itinerary-editor]').forEach((editor) => {
+        let nextIndex = Number(editor.dataset.nextIndex || 0);
+        editor.addEventListener('click', (event) => {
+            if (event.target.closest('[data-remove-day]')) {
+                event.target.closest('[data-itinerary-day]').remove();
+                return;
+            }
+
+            if (event.target.closest('[data-add-day]')) {
+                const day = editor.querySelector('[data-itinerary-template]').innerHTML
+                    .replaceAll('__INDEX__', String(nextIndex))
+                    .replaceAll('__DAY__', String(nextIndex + 1));
+                editor.querySelector('[data-itinerary-days]').insertAdjacentHTML('beforeend', day);
+                nextIndex += 1;
+            }
+        });
+    });
+    document.querySelectorAll('[data-faq-editor]').forEach((editor) => {
+        let nextIndex = Number(editor.dataset.nextIndex || 0);
+        editor.addEventListener('click', (event) => {
+            if (event.target.closest('[data-remove-faq]')) {
+                event.target.closest('[data-faq-item]').remove();
+                return;
+            }
+
+            if (event.target.closest('[data-add-faq]')) {
+                const faq = editor.querySelector('[data-faq-template]').innerHTML.replaceAll('__INDEX__', String(nextIndex));
+                editor.querySelector('[data-faq-items]').insertAdjacentHTML('beforeend', faq);
+                nextIndex += 1;
+            }
+        });
+    });
+</script>
 @endsection

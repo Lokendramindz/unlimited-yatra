@@ -12,5 +12,6 @@ class Enquiry extends Model
     protected $guarded = [];
 
     public function yatra() { return $this->belongsTo(Yatra::class); }
+    public function fleet() { return $this->belongsTo(Fleet::class); }
 
 }

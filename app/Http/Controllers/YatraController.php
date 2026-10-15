@@ -9,7 +9,7 @@ class YatraController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Yatra::active()->with('category');
+        $query = Yatra::active()->with('category')->withApprovedReviewSummary();
         $title = 'All Yatras';
         $intro = 'Tailor made authentic yatras to sacred destinations across India, Nepal and Tibet.';
         $banner = null;
@@ -67,10 +67,14 @@ class YatraController extends Controller
     public function show(string $slug)
     {
         $yatra = Yatra::active()->with('category')->where('slug', $slug)->firstOrFail();
-        $related = Yatra::active()->where('id', '!=', $yatra->id)
+        $related = Yatra::active()->withApprovedReviewSummary()->where('id', '!=', $yatra->id)
             ->where('category_id', $yatra->category_id)->limit(3)->get();
         $yatraOptions = Yatra::active()->orderBy('title')->pluck('title', 'id');
+        $reviewQuery = $yatra->reviews()->approved();
+        $reviewCount = (clone $reviewQuery)->count();
+        $reviewAverage = round((clone $reviewQuery)->avg('rating') ?? 0, 1);
+        $reviews = $reviewQuery->orderByDesc('is_featured')->orderByDesc('rating')->latest()->limit(6)->get();
 
-        return view('yatras.show', compact('yatra', 'related', 'yatraOptions'));
+        return view('yatras.show', compact('yatra', 'related', 'yatraOptions', 'reviews', 'reviewCount', 'reviewAverage'));
     }
 }

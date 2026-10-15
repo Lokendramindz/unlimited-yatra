@@ -99,6 +99,18 @@ class ResourceController extends Controller
         $rules = [];
         foreach ($cfg['fields'] as $f) {
             $rule = $f['rules'] ?? 'nullable';
+            if ($f['type'] === 'faq_list') {
+                $rules['faqs'] = 'nullable|array|max:30';
+                $rules['faqs.*.question'] = 'nullable|string|max:255';
+                $rules['faqs.*.answer'] = 'nullable|string|max:3000';
+                continue;
+            }
+            if ($f['type'] === 'itinerary') {
+                $rules['itinerary_days'] = 'nullable|array|max:100';
+                $rules['itinerary_days.*.title'] = 'nullable|string|max:255';
+                $rules['itinerary_days.*.content'] = 'nullable|string|max:10000';
+                continue;
+            }
             if ($f['type'] === 'image') {
                 $rule = (($f['required_on_create'] ?? false) && ! $item ? 'required' : 'nullable').'|image|max:5120';
             }
@@ -143,6 +155,28 @@ class ResourceController extends Controller
                         $keep->push($file->store('gallery', 'public'));
                     }
                     $data[$name] = $keep->all();
+                    break;
+                case 'itinerary':
+                    $days = collect($request->input('itinerary_days', []))
+                        ->map(fn ($day) => [
+                            'title' => trim((string) ($day['title'] ?? '')),
+                            'content' => trim((string) ($day['content'] ?? '')),
+                        ])
+                        ->filter(fn ($day) => $day['title'] !== '' || $day['content'] !== '')
+                        ->values()
+                        ->all();
+                    $data[$name] = $days ? json_encode($days, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+                    break;
+                case 'faq_list':
+                    $faqs = collect($request->input('faqs', []))
+                        ->map(fn ($faq) => [
+                            'question' => trim((string) ($faq['question'] ?? '')),
+                            'answer' => trim((string) ($faq['answer'] ?? '')),
+                        ])
+                        ->filter(fn ($faq) => $faq['question'] !== '' && $faq['answer'] !== '')
+                        ->values()
+                        ->all();
+                    $data[$name] = $faqs ? json_encode($faqs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
                     break;
                 default:
                     $val = $validated[$name] ?? null;

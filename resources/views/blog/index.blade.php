@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('title', 'News & Blog - '.($site['site_name'] ?? 'Unlimited Yatra'))
+@section('description', 'Read practical pilgrimage travel guides, yatra planning tips and spiritual stories from Unlimited Yatra.')
+@section('image', $posts->first()?->image_url ?? '')
 @section('content')
 @include('partials.page-hero', ['heroTitle' => 'News & Blog', 'heroSub' => 'Yatra guides, travel tips and spiritual stories.', 'crumbs' => ['Blog' => null]])
 <section class="max-w-7xl mx-auto px-4 py-14">

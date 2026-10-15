@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Our Guides & Yatra Leaders - '.($site['site_name'] ?? 'Unlimited Yatra'))
+@section('description', 'Meet the experienced yatra leaders and spiritual travel guides who accompany pilgrims across India, Nepal and Tibet.')
 @section('content')
 @include('partials.page-hero', ['heroTitle' => 'Tour Guides & Yatra Leaders', 'heroSub' => 'Experienced, devoted people who walk with you at every step of your yatra.', 'crumbs' => ['Our Guides' => null]])
 <section class="max-w-7xl mx-auto px-4 py-14">

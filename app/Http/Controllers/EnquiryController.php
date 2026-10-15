@@ -24,8 +24,11 @@ class EnquiryController extends Controller
             'phone' => 'required|max:30',
             'email' => 'nullable|email|max:150',
             'yatra_id' => 'nullable|exists:yatras,id',
+            'fleet_id' => 'nullable|exists:fleets,id',
             'travellers' => 'nullable|integer|min:1|max:500',
             'travel_date' => 'nullable|date',
+            'pickup_location' => 'nullable|string|max:255',
+            'dropoff_location' => 'nullable|string|max:255',
             'message' => 'nullable|max:2000',
         ]);
 

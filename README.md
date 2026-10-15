@@ -7,9 +7,7 @@ Spiritual yatra tour website ("Tailor made Authentic Yatras Since 2006") built f
 composer install
 cp .env.example .env
 php artisan key:generate
-# default DB is SQLite:
-touch database/database.sqlite
-# (or set DB_CONNECTION=mysql + DB_* in .env)
+# Create a MySQL database named unlimitedyatradb, then run migrations:
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
@@ -34,6 +32,12 @@ All CRUD screens are generated from `config/admin.php` - add a resource there (+
 ## Notes
 - Demo images are placeholders (picsum.photos). Upload real Varanasi / Kedarnath / Puri / Maha Kumbh images from admin.
 - Uploaded images are stored in `storage/app/public` (needs `php artisan storage:link`).
+- Fleet demo images are stored locally as WebP files and sourced from Unsplash under its free license. Replace them with photos of your actual vehicles before launch:
+    - Sedan: [Thein Than Zaw](https://unsplash.com/photos/white-sedan-on-wet-road-beside-green-grass-kb9dTYzZuiQ)
+    - Innova: [Zoshua Colah](https://unsplash.com/photos/a-white-car-parked-on-a-city-street-i7iC4G_FjQA)
+    - Passenger vans: [Markus Winkler](https://unsplash.com/photos/white-vans-parked-in-mossingen-3vlGNkDep4E)
+    - Coach: [Jonathan Borba](https://unsplash.com/photos/parked-blue-and-black-compertur-bus-T5jzpRTVF1U)
+- For an existing installation, apply database changes with `php artisan migrate`, then populate missing fleet demo details with `php artisan db:seed --class=FleetDemoContentSeeder`.
 - For production: `APP_ENV=production APP_DEBUG=false`, run `php artisan config:cache route:cache view:cache`,
   and consider replacing the Tailwind CDN with a Vite build for best speed.
 - If you already ran migrations earlier, run `php artisan migrate:fresh --seed` (new columns/tables were added).

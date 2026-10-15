@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             'about_text' => "Since 2006 Unlimited Yatra has been designing tailor made pilgrimage journeys across India, Nepal and Tibet. From the ghats of Varanasi and the Sangam at Prayagraj to Kedarnath, Jagannath Puri and the Maha Kumbh, our yatra leaders take care of every detail - comfortable stays, sattvic food, reliable transport and devoted guides - so you can focus on your darshan.",
             'map_embed' => 'https://www.google.com/maps?q=Jaipur,Rajasthan&output=embed',
             'facebook' => '#', 'instagram' => '#', 'youtube' => '#',
+            'twitter' => '', 'linkedin' => '',
         ];
         foreach ($settings as $k => $v) {
             Setting::updateOrCreate(['key' => $k], ['value' => $v]);
@@ -136,13 +137,41 @@ class DatabaseSeeder extends Seeder
         }
 
         // Fleet
-        foreach ([['Sedan (Dzire / Etios)', '4 Seater'], ['Innova Crysta', '6 Seater'], ['Tempo Traveller', '12-17 Seater'], ['Luxury Coach', '35-45 Seater']] as $i => [$n, $cap]) {
-            Fleet::create(['name' => $n, 'capacity' => $cap, 'image' => $img('fleet'.$i, 800, 500), 'description' => 'Clean, AC and driven by experienced drivers.', 'sort_order' => $i]);
+        foreach ([
+            ['Sedan (Dzire / Etios)', 'Sedan', 4, '4 Guests', '2 Bags', "AC and GPS included\nIdeal for couples and solo travel\nCity and short-distance tours", 'fleet-demo/sedan.webp'],
+            ['Innova Crysta', 'MPV', 6, '6 Guests', '4 Bags', "Most booked for families\nSpacious boot for luggage\nAll India long-distance", 'fleet-demo/innova.webp'],
+            ['Tempo Traveller', 'Tempo Traveller', 12, '12-17 Guests', '10 Bags', "Group-friendly seating\nAir-conditioned cabin\nGreat for pilgrimage circuits", 'fleet-demo/van.webp'],
+            ['Luxury Coach', 'Coach', 35, '35-45 Guests', '35 Bags', "Comfortable reclining seats\nExperienced coach drivers\nSuitable for large groups", 'fleet-demo/coach.webp'],
+        ] as $i => [$n, $class, $seats, $cap, $bags, $features, $image]) {
+            Fleet::create([
+                'name' => $n,
+                'slug' => Str::slug($n),
+                'vehicle_class' => $class,
+                'seat_count' => $seats,
+                'capacity' => $cap,
+                'baggage_capacity' => $bags,
+                'air_conditioning' => true,
+                'driver_included' => true,
+                'features' => $features,
+                'details' => 'Clean, air-conditioned and driven by experienced drivers for comfortable pilgrimage travel.',
+                'faqs' => json_encode([
+                    ['question' => 'Is a driver included?', 'answer' => 'Yes, an experienced driver is included with this vehicle.'],
+                    ['question' => 'How is the rental price calculated?', 'answer' => 'We confirm the quote for your route, date, duration and expected distance before booking.'],
+                    ['question' => 'Are tolls, parking and overnight charges included?', 'answer' => 'Any route-specific tolls, parking or overnight charges are explained in your final trip quote.'],
+                    ['question' => 'Can I request a multi-day pilgrimage booking?', 'answer' => 'Yes. Share your itinerary and dates in the enquiry form to receive an availability and route quote.'],
+                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'image' => $image,
+                'description' => 'Comfortable, air-conditioned transport with experienced drivers.',
+                'is_popular' => true,
+                'sort_order' => $i,
+            ]);
         }
 
         // Affiliations
         foreach (['IATA', 'Ministry of Tourism', 'TAAI', 'ADTOI', 'Incredible India', 'IATO'] as $i => $n) {
             Affiliation::create(['name' => $n, 'image' => $img('aff'.$i, 240, 120), 'sort_order' => $i]);
         }
+
+        $this->call(CatalogExpansionSeeder::class);
     }
 }
